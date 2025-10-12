@@ -1,0 +1,10 @@
+#
+# Int64min0
+#
+description: |
+  @id type (int64 >= 1)
+type: integer
+format: int64
+minimum: 1
+example: 42
+x-example: 42

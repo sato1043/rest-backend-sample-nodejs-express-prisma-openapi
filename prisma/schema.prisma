@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// concept:
+//   - https://www.prisma.io/docs/getting-started/quickstart
+//   - https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases-typescript-postgres
+//   - https://www.prisma.io/docs/concepts/components/prisma-client/working-with-prismaclient/generating-prisma-client
+//   - https://www.prisma.io/docs/concepts/components/prisma-schema
+//   - https://www.prisma.io/docs/concepts/components/prisma-schema/data-model
+//   - https://www.prisma.io/docs/concepts/components/prisma-schema/relations
+//   - https://www.prisma.io/docs/concepts/components/prisma-schema/indexes
+//   - https://www.prisma.io/docs/concepts/components/prisma-schema/names-in-underlying-database
+//   - https://www.prisma.io/blog/client-extensions-preview-8t3w27xkrxxn#example-computed-fields
+
+// reference:
+//   - https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference
+//   - https://www.prisma.io/docs/reference/api-reference/command-reference
+//   - https://www.prisma.io/docs/guides/database/production-troubleshooting
+//   - https://github.com/prisma/prisma-examples
+//   - https://fakerjs.dev/api/
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+generator factories {
+  provider = "prisma-factory"
+}
+
+generator jsonSchema {
+  // - https://json-schema.org
+  provider                 = "prisma-json-schema-generator"
+  keepRelationScalarFields = "true"
+  includeRequiredFields    = "true"
+  persistOriginalType      = "true"
+}
+
+generator openapi {
+  provider = "ts-node prisma/generator-openapi-components-schema"
+  output   = "../openapi/components/schemas"
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
+generator erd {
+  provider                  = "prisma-erd-generator"
+  output                    = "docs/ERD.md"
+  includeRelationFromFields = true
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+}
+
+// https://www.prisma.io/docs/reference/database-reference/connection-urls
+// https://www.prisma.io/docs/concepts/components/prisma-migrate/shadow-database
+datasource db {
+  provider          = "mysql"
+  url               = env("RDB1_URL")
+  shadowDatabaseUrl = env("RDB1_PRISMA_SHADOW_DB_URL")
+}
+
+// model writing rules;
+//  - needs double quote
+//  - pascal-case entity name ; Entiry
+//  - and must have snake-case @@map ; @@map("entity")
+//  - camel-case attribute name ; attributeId
+//  - and must have snake-case @map ; @@map("attribute_id")
+//  - write strict domain name in comment ; // エンティティID  not just ID for examle
+//  - must have createdAt / updatedAt at top
+//    - createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
+//    - updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.DateTime(0)
+//      - @updatedAt will be treat in generated client code
+//  - uuid unique-key @id
+//  - @db.DateTime(0) ; exactry add '(0)' preifx
+//  - maybe use DateTime than TimeStamp
+//  - use default-value
+//  - use not-null
+//  - first, migrate dev --create-only and you must check queries. then you just to migrate dev
+//
+
+//
+// TODO
+//
+model Todo {
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.DateTime(0)
+
+  todoId Int    @id @default(autoincrement()) @map("todo_id") // TODO ID
+  name   String @unique @db.VarChar(100) // TODO名
+  email  String @unique @db.VarChar(255) // Eメールアドレス
+  text   String @unique @db.VarChar(1024) // テキスト
+
+  @@map("todos")
+}

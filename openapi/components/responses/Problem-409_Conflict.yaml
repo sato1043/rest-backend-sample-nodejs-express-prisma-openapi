@@ -1,0 +1,12 @@
+#
+# Problem
+#
+description: Resource Conflict
+content:
+  application/problem+json:
+    schema:
+      $ref: ../schemas/_Problem.yaml
+    example:
+      title: Resource Conflict
+      status: 409
+      detail: paramThatOccurred,anotherOne

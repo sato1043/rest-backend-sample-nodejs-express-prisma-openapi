@@ -1,0 +1,16 @@
+node_modules
+.aws
+.husky
+.idea
+.editorconfig
+.git
+.gitignore
+.gitattributes
+.node-version
+.yarnrc
+README.md
+buildspec.yml
+coverage
+dist
+*.log
+*.example

@@ -1,0 +1,4 @@
+#!/bin/sh
+CMD="npx dotenv -- ./test-prepare-dbs.sh $@"
+echo "${CMD}"
+docker compose exec dev-app sh -c "${CMD}"

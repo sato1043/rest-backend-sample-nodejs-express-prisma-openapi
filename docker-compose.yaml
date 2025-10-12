@@ -1,0 +1,80 @@
+name: ${PROJECT}
+
+volumes:
+  rdb-store:
+    name: ${PROJECT}-rdb-store
+
+services:
+  rdb:
+    container_name: ${PROJECT}-rdb
+    image: mysql:5.7 # use with Aurora supported
+    restart: always
+    tty: true
+    ports: ['${RDB1_PORT}:3306']
+    volumes:
+      - rdb-store:/var/lib/mysql
+      - ./.docker-compose/rdb/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./.docker-compose/rdb/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./.docker-compose/rdb/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      TZ: ${RDB1_TZ}
+      MYSQL_ROOT_PASSWORD: ${RDB1_ROOT_PASS}
+      MYSQL_USER: ${RDB1_USER}
+      MYSQL_PASSWORD: ${RDB1_PASS}
+      MYSQL_DATABASE: ${RDB1_DB_NAME}
+      RDB1_ROOT_PASS: ${RDB1_ROOT_PASS}
+      RDB1_USER: ${RDB1_USER}
+      RDB1_PRISMA_SHADOW_DB_NAME: ${RDB1_PRISMA_SHADOW_DB_NAME}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  dev-app:
+    container_name: ${PROJECT}-dev-app
+    build:
+      context: .
+      dockerfile: .docker-compose/dev-app/Dockerfile
+      args:
+        - AWS_ACCOUNT_ID
+        - AWS_REGION
+    tty: true
+    volumes:
+      - .env:/app/.env
+      - ./prisma:/app/prisma
+      - ./openapi:/app/openapi
+      - ./src:/app/src
+      - ./coverage:/app/coverage
+    depends_on: ['rdb']
+    ports: ['3000:3000', '9299:9229']
+    environment:
+      TZ: ${RDB1_TZ}
+      APP1_HOST: ${APP1_HOST}
+      APP1_PORT: ${APP1_PORT}
+      APP1_API_KEY_PASSPHRASE: ${APP1_API_KEY_PASSPHRASE}
+      APP1_API_KEY_SALT: ${APP1_API_KEY_SALT}
+      RDB1_HOST: ${RDB1_HOST}
+      RDB1_PORT: ${RDB1_PORT}
+      RDB1_DB_NAME: ${RDB1_DB_NAME}
+      RDB1_URL: ${RDB1_URL}
+      RDB1_PRISMA_SHADOW_DB_URL: ${RDB1_PRISMA_SHADOW_DB_URL}
+      HEALTHCHECK_ENDPOINT_PATH: ${HEALTHCHECK_ENDPOINT_PATH}
+      GRACEFUL_SHUTDOWN_TIMEOUT_SEC: ${GRACEFUL_SHUTDOWN_TIMEOUT_SEC}
+      SAAS_DOMAIN: ${SAAS_DOMAIN}
+      LISTEN_ON_HTTPS: ${LISTEN_ON_HTTPS}
+
+  openapi-ui:
+    container_name: ${PROJECT}-openapi-ui
+    image: swaggerapi/swagger-ui
+    ports:
+      - '3002:8080'
+    volumes:
+      - ./openapi/openapi.bundled.yaml:/openapi.yaml
+    environment:
+      SWAGGER_JSON: /openapi.yaml
+#  mock-api:
+#    container_name: ${PROJECT}-mock-api
+#    image: stoplight/prism:3
+#    ports:
+#      - "3003:4010"
+#    command: mock -h 0.0.0.0 /openapi.yaml
+#    volumes:
+#      - ./openapi/openapi.bundled.yaml:/openapi.yaml

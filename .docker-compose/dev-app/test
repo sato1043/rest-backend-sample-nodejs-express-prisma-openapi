@@ -1,0 +1,6 @@
+#!/bin/sh
+CMD="npx dotenv -v NODE_ENV=test -- jest $@"
+echo "${CMD}"
+docker compose exec dev-app sh -c "${CMD}"
+
+# コマンドラインに -t AAA でテスト仕様を AAA で絞り込みます

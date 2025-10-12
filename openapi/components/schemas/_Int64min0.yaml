@@ -1,0 +1,10 @@
+#
+# Int64min0
+#
+description: |
+  Integer(64) >= 0
+type: integer
+format: int64
+minimum: 0
+example: 42
+x-example: 42

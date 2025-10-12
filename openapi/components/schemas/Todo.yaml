@@ -1,0 +1,26 @@
+#
+# Todo  (generated from schema.prisma)
+#
+type: object
+properties:
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+  todoId:
+    type: integer
+  name:
+    type: string
+  email:
+    type: string
+  text:
+    type: string
+required:
+  - createdAt
+  - updatedAt
+  - todoId
+  - name
+  - email
+  - text

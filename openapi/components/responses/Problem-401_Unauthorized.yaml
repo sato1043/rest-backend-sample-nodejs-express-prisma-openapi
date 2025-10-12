@@ -1,0 +1,11 @@
+#
+# Problem
+#
+description: Request Unauthorized
+content:
+  application/problem+json:
+    schema:
+      $ref: ../schemas/_Problem.yaml
+    example:
+      title: Request Unauthorized
+      status: 401

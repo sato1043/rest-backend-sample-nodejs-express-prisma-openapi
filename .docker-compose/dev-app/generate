@@ -1,0 +1,4 @@
+#!/bin/sh
+CMD="npx prisma generate $@"
+echo "${CMD}"
+docker compose exec dev-app sh -c "${CMD}"

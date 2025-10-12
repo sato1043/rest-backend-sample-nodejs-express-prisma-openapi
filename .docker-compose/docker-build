@@ -1,0 +1,15 @@
+#!/bin/sh
+[ ! -f .env ] || export $(grep -v '^#' .env | xargs)
+
+[ -z "${AWS_ACCOUNT_ID}" ] && exit 1
+[ -z "${AWS_REGION}" ] && exit 1
+[ -z "${REPOS_NAME}" ] && exit 1
+
+REPOS_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOS_NAME}
+
+echo belows are including in...
+npx tsc --listFiles -p ./tsconfig.release.json | grep -v node_modules
+
+docker build . -t ${REPOS_URI} \
+  --build-arg AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} \
+  --build-arg AWS_REGION=${AWS_REGION}

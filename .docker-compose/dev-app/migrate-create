@@ -1,0 +1,12 @@
+#!/bin/sh
+F=./prisma/schema.prisma
+CMD="npx prisma migrate diff --from-schema-datasource ${F} --to-schema-datamodel ${F} --exit-code"
+# --exit-code   the diff is (Empty: 0, Error: 1, Not empty: 2)
+docker compose exec dev-app sh -c "$CMD"
+[ $? -eq 0 ] && exit 0
+
+docker compose exec dev-app sh -c "npx prisma migrate deploy"
+docker compose exec dev-app sh -c "$CMD"
+[ $? -eq 0 ] && exit 0
+
+docker compose exec dev-app sh -c "npx prisma migrate dev --create-only"

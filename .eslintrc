@@ -1,0 +1,116 @@
+{
+  // NOTE: This file is JSON but can use C-style comment line
+  "env": {
+    "es2021": true,
+    "node": true,
+    "jest/globals": true
+  },
+  "globals": {
+    "page": true,
+    "browser": true,
+    "context": true,
+    "puppeteerConfig": true,
+    "jestPuppeteer": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "jest",
+    "unused-imports",
+    "import",
+    "@typescript-eslint"
+  ],
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    },
+    "import/ignore": [
+      "node_modules"
+    ]
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:jest/recommended",
+    "prettier"
+  ],
+  "ignorePatterns": [
+    "dist",
+    "coverage",
+    "node_modules",
+    "src/types/openapi.schema.d.ts"
+  ],
+  "rules": {
+    "import/no-unresolved": [
+      2,
+      {
+        "ignore": [
+          "prisma-factory/generated",
+          "../../prisma/factories/*"
+        ]
+      }
+    ],
+    "unused-imports/no-unused-imports": "error",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+
+    /// lines without semicolon
+    "semi": ["error", "never", {"beforeStatementContinuationChars": "never"}],
+    "semi-spacing": ["error", {"after": true, "before": false}],
+    "semi-style": ["error", "first"],
+    "no-extra-semi": "error",
+    "no-unexpected-multiline": "error",
+    "no-unreachable": "error"
+
+    /// #REF: lines with semicolon
+    // "semi": ["error", "always"],
+    // "semi-spacing": ["error", {"after": true, "before": false}],
+    // "semi-style": ["error", "last"],
+    // "no-extra-semi": "error",
+    // "no-unexpected-multiline": "error",
+    // "no-unreachable": "error"
+  },
+  "overrides": [
+    {
+      "files": ["src/**/?(*.)+(spec|factory).[jt]s?(x)"],
+      "extends": [
+        "plugin:jest/recommended",
+        "plugin:jest/style"
+      ]
+    },
+    {
+      "files": ["src/**/*.[jt]s?(x)"],
+      "rules": {
+        "import/order": [
+          "error",
+          {
+            "groups": [
+              "builtin",
+              "external",
+              "internal",
+              "parent",
+              "sibling",
+              "index",
+              "object",
+              "type"
+            ],
+            "alphabetize": {
+              "order": "asc",
+              "caseInsensitive": true
+            },
+            "newlines-between": "always"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+[ ! -f .env ] || export $(grep -v '^#' .env | xargs)
+CMD="npx dotenv -- npx ts-node -P tsconfig.ts-node.json -r tsconfig-paths/register ./prisma/repl.ts"
+echo "${CMD}"
+docker compose exec dev-app sh -c "$CMD"

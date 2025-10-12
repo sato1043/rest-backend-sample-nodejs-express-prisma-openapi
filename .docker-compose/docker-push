@@ -1,0 +1,19 @@
+#!/bin/sh
+[ ! -f .env ] || export $(grep -v '^#' .env | xargs)
+
+[ -z "$AWS_REGION" ] && exit 1
+[ -z "$AWS_ACCOUNT_ID" ] && exit 1
+[ -z "$REPOS_NAME" ] && exit 1
+
+REPOS_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOS_NAME}
+IMAGE_TAG=$(git log -n 1 --format="%H" | cut -c 1-7)
+
+cat <<EOD
+======
+** pushing docker image **
+ ${REPOS_URI}:${IMAGE_TAG}  and as latest
+======
+EOD
+docker tag "${REPOS_URI}":latest "${REPOS_URI}":"${IMAGE_TAG}"
+docker push "${REPOS_URI}":latest
+docker push "${REPOS_URI}":"${IMAGE_TAG}"

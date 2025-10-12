@@ -1,0 +1,11 @@
+#
+# Problem
+#
+description: Resource Not Found
+content:
+  application/problem+json:
+    schema:
+      $ref: ../schemas/_Problem.yaml
+    example:
+      title: Resource Not Found
+      status: 404

@@ -1,0 +1,25 @@
+{
+  "launch": {
+    "executablePath": "/usr/bin/chromium-browser",
+    "headless": true,
+    "slowMo": 0,
+    "defaultViewport": null,
+    "args": [
+      "--headless",
+      "--window-size=1920,1080",
+      "--incognito",
+      "--start-maximized",
+      "--disable-extensions",
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--no-first-run",
+      "--no-zygote"
+    ],
+    "setDefaultNavigationTimeout": 8000000,
+    "setDefaultTimeout": 8000000,
+    "ignoreHTTPSErrors": true
+  },
+  "browserContext": "default"
+}

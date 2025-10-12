@@ -1,0 +1,4 @@
+#!/bin/sh
+CMD="yarn openapi:bundle"
+echo "${CMD}"
+docker compose exec dev-app sh -c "${CMD}"

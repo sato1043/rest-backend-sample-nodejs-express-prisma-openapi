@@ -1,0 +1,11 @@
+#
+# Problem
+#
+description: Unprocessable Entity
+content:
+  application/problem+json:
+    schema:
+      $ref: ../schemas/_Problem.yaml
+    example:
+      title: Unprocessable Entity
+      status: 422

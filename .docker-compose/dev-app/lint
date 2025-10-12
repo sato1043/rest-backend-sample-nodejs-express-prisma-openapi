@@ -1,0 +1,9 @@
+#!/bin/sh
+
+CMD="npx prisma format $@"
+echo "${CMD}"
+docker compose exec dev-app sh -c "${CMD}"
+
+CMD2="npx dotenv -- eslint src/**/*.ts --fix $@"
+echo "${CMD2}"
+docker compose exec dev-app sh -c "${CMD2}"

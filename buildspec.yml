@@ -1,0 +1,47 @@
+version: 0.2
+
+# Environment variables we need to inject from AWS console
+#  - AWS_REGION
+#  - AWS_ACCOUNT_ID
+#  - REPOS_NAME
+#  - API_KEYS_JSON
+
+# https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-env-ref-available.html
+
+env:
+  variables:
+    # https://dev.classmethod.jp/articles/codebuild-buildkit/
+    DOCKER_BUILDKIT: "1"
+
+phases:
+
+  install:
+    runtime-versions:
+      docker: 20.x
+      nodejs: 16.x
+      # https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/runtime-versions.html
+
+  pre_build:
+    commands:
+      # set in environ variables ; $AWS_REGION / $AWS_ACCOUNT_ID / $REPOS_NAME
+      - ECR_HOST=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+      - echo ${AWS_REGION} / ${AWS_ACCOUNT_ID} / ${REPOS_NAME} / ${ECR_HOST}
+      - aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_HOST}"
+  build:
+    commands:
+      - REPOS_URI=${ECR_HOST}/${REPOS_NAME}
+      - IMAGE_TAG=$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -c 1-7)
+      - echo ${REPOS_URI} / ${IMAGE_TAG}
+      - echo ${API_KEYS_JSON} > src/.api-keys.json
+      - docker build -t ${REPOS_URI} . --build-arg AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} --build-arg AWS_REGION=${AWS_REGION}
+  post_build:
+    commands:
+      - docker tag $REPOS_URI:latest $REPOS_URI:$IMAGE_TAG
+      - docker push $REPOS_URI:latest
+      - docker push $REPOS_URI:$IMAGE_TAG
+      - docker logout
+      - printf '{"name":"%s","ImageURI":"%s"}' $ECR_REPOSITORY_NAME $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+
+artifacts:
+  files:
+    - imageDetail.json

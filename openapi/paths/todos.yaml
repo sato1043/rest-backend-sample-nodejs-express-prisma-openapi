@@ -1,0 +1,188 @@
+#
+# GET  /todos
+# POST /todos
+#
+
+# -----
+# GET  /todos
+# -----
+get:
+  tags:
+    - Todo
+  summary: TODO一覧
+  operationId: todoList
+  description: |
+    - ログイン済み前提
+    - ここで示すのはシーク法によるページネーションの定義例。シーク法はページジャンプをIDで計算するのでインフィニットスクロールでページネーションがずれない
+    - ページナビゲートのパラメータ４種（page|pagePrev|pageNext|infinite）は、排他的なオプションで、同時指定時にエラーとする（openAPIは排他オプションを定義できないため実装時は注意）
+      - ページ番号指定では（クエリー時点の表示内容に関わらず）クエリー時点のデータベースでそのページ番号の内容となる選択行を返す(のみ)
+      - 前ページ送りでは現在ページの最終行を基準に（データベースでの行数の増減に関わらず）前ページのperPage件以下を返却
+        1. ページ先頭行IDによりページ境界を計算（なお検索範囲は現在ページから前後10ページ程度でUIに表示が必要な範囲で）
+        2. 現在ページ先頭行IDより前のページ境界のうちの最大値を選択
+        3. 3.より後のperPage件を返却
+      - 次ページ送りでは現在ページの最終行を基準に（データベースでの行数の増減に関わらず）次ページのperPage件以下を返却
+        1. ページ後尾行IDによりページ境界を計算（なお検索範囲は現在ページから前後10ページ程度でUIに表示が必要な範囲で）
+        2. 現在ページ後尾行ID 以前のページ境界のうち最大を選択
+        3. 2.より後のperPage件を返却
+      - 無限スクロールでは現在ページの後尾行IDより後のperPage件以下を返却
+  parameters:
+    - description: 選択対象の限定条件（JSON値、複数可） https://swagger.io/docs/specification/serialization/
+      in: query
+      name: filter
+      required: false
+      example: '[{f:"email",s:"inc",c:"demo@"}]'
+      style: form
+      explode: true
+      allowEmptyValue: false
+      nullable: false
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                f: # means field
+                  $ref: ../components/schemas/TodoFieldEnum.yaml
+                s: # means sign
+                  $ref: ../components/parameters/FilterCompareSignEnum.yaml
+                c: # means condition
+                  type: string
+    - description: 選択対象の整列キー（JSON値、複数可）
+      in: query
+      name: order
+      required: false
+      allowEmptyValue: false
+      nullable: false
+      example: '[{f:"todoId",d:"asc"}]'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                f: # means field
+                  $ref: ../components/schemas/TodoFieldEnum.yaml
+                d: # means direct
+                  $ref: ../components/parameters/OrderDirection.yaml
+    - description: ページ当たり選択行数
+      in: query
+      name: perPage
+      required: false
+      allowEmptyValue: false
+      nullable: false
+      schema:
+        $ref: ../components/schemas/PerPage.yaml
+    - description: ナビゲート・ページ番号指定
+      in: query
+      name: page
+      required: false
+      allowEmptyValue: false
+      nullable: false
+      schema:
+        $ref: ../components/schemas/_Int64min1.yaml
+      example: 3
+    - description: ナビゲート・前ページ送り（現在ページの先頭行ID指定）
+      in: query
+      name: pagePrev
+      required: false
+      allowEmptyValue: false
+      nullable: false
+      schema:
+        $ref: ../components/schemas/_ID.yaml
+      example: 55
+    - description: ナビゲート・次ページ送り（現在ページの末尾行ID指定）
+      in: query
+      name: pageNext
+      required: false
+      allowEmptyValue: false
+      nullable: false
+      schema:
+        $ref: ../components/schemas/_ID.yaml
+      example: 55
+    - description: ナビゲート・次perPage件取得（現在ページの末尾行ID指定）
+      in: query
+      name: infinite
+      required: false
+      allowEmptyValue: false
+      nullable: false
+      schema:
+        $ref: ../components/schemas/_ID.yaml
+      example: 55
+  responses:
+    '200':
+      description: Listed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              perPage:
+                $ref: ../components/schemas/PerPage.yaml
+              pageTotal:
+                $ref: ../components/schemas/_Int64min0.yaml
+              currentPageNo:
+                $ref: ../components/schemas/_Int64min0.yaml
+              list:
+                description: 選択行リスト（０件の場合は空配列）
+                type: array
+                minimum: 0
+                maxItems: 50 # = perPage
+                items:
+                  $ref: ../components/schemas/Todo.yaml
+                example:
+                  - [
+                      { todoId: 4201 },
+                      { todoId: 4203 },
+                      { todoId: 4204 },
+                      { todoId: 4207 },
+                      ...,
+                      { todoId: 4255 },
+                    ]
+            required:
+              - perPage
+              - pageTotal
+              - currentPageNo
+              - list
+    '400':
+      $ref: ../components/responses/Problem-400_BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Problem-401_Unauthorized.yaml
+
+# -----
+# POST /todos
+# -----
+post:
+  tags:
+    - Todo
+  summary: TODO作成
+  operationId: todoCreate
+  description: |
+    - ログイン済み前提
+    - 別途UI用のキー項目重複確認APIが必要（email, name 各１）
+    - 既存レコードと主キー制約で競合する場合はエラーとする(409)
+  requestBody:
+    description: 作成するTODO属性
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/TodoCreate.yaml
+        example:
+          name: Information Of The Demonstration
+          email: demo@example.info
+          text: 牛乳を買って帰る（低脂肪のみ可）
+  responses:
+    '201':
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Todo.yaml
+    '400':
+      $ref: ../components/responses/Problem-400_BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Problem-401_Unauthorized.yaml
+    '409':
+      $ref: ../components/responses/Problem-409_Conflict.yaml

@@ -1,0 +1,5 @@
+#!/bin/sh
+F=./prisma/schema.prisma
+CMD="npx prisma migrate diff --from-schema-datasource ${F} --to-schema-datamodel ${F} --exit-code $@"
+echo "${CMD}"
+docker compose exec dev-app sh -c "$CMD"

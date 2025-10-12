@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Todo": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "todoId": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "email": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "text": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "text"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "todo": {
+      "$ref": "#/definitions/Todo"
+    }
+  }
+}

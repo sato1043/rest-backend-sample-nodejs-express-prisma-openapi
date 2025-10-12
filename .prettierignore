@@ -1,0 +1,10 @@
+.git*
+dist
+node_modules
+coverage
+yarn.lock
+prisma/docs
+prisma/json-schema
+openapi/openapi.bundled.yaml
+openapi/openapi.static.html
+tsconfig.json

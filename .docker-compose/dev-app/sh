@@ -1,0 +1,10 @@
+#!/bin/sh
+
+CHECK="\"$@\""
+if [ "${CHECK}" = '""' ]; then
+  docker compose exec dev-app sh
+else
+  CMD="$@"
+  echo $CMD
+  docker compose exec dev-app sh -c "$CMD"
+fi

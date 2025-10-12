@@ -1,0 +1,12 @@
+#!/bin/sh
+[ ! -f .env ] || export $(grep -v '^#' .env | xargs)
+CMD="mysql -u ${RDB1_USER} -p -h ${RDB1_HOST} -P ${RDB1_PORT} ${RDB1_DB_NAME}"
+
+cat <<EOD
+======
+** running mysql '${RDB1_USER}' console **
+======
+$CMD
+EOD
+
+docker compose exec dev-app sh -c "$CMD"

@@ -1,0 +1,11 @@
+#
+# Problem
+#
+description: Problem
+content:
+  application/problem+json:
+    schema:
+      $ref: ../schemas/_Problem.yaml
+    example:
+      title: Internal Server Error
+      status: 500

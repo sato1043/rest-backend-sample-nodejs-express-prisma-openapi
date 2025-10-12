@@ -1,0 +1,107 @@
+#
+# PUT    /todos/{todoId}
+# DELETE /todos/{todoId}
+# GET    /todos/{todoId}
+#
+
+parameters:
+  - description: 取得する TODO ID
+    name: todoId
+    in: path
+    required: true
+    allowEmptyValue: false
+    nullable: false
+    schema:
+      $ref: ../components/schemas/_ID.yaml
+    example: 42
+    x-example: 42
+
+# -----
+# PUT /todos/{todoId}
+# -----
+put:
+  tags:
+    - Todo
+  summary: todoIdによる属性変更
+  operationId: todoUpdate
+  description: |
+    - ログイン済み前提
+    - ビジネス条件の揃わない更新不可レコードの更新試行はエラーとする(422)
+  requestBody:
+    description: 変更するTODO属性
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/TodoUpdate.yaml
+        example:
+          name: Information Of The Demonstration
+          email: demo@example.info
+  responses:
+    '200':
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Todo.yaml
+    '400':
+      $ref: ../components/responses/Problem-400_BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Problem-401_Unauthorized.yaml
+    '404':
+      $ref: ../components/responses/Problem-404_NotFound.yaml
+    '422':
+      $ref: ../components/responses/Problem-422_UnprocessableEntity.yaml
+
+# -----
+# DELETE /todos/{todoId}
+# -----
+delete:
+  tags:
+    - Todo
+  summary: todoIdによるTODO削除
+  operationId: todoDelete
+  description: |
+    - ログイン済み前提
+    - 削除前に精算の事務処理終了確認あるいはシステム連携が入るだろう
+    - ビジネス条件の揃わない削除不可レコードの削除試行はエラーとする(422)
+    - 削除済みレコードは（保全上）ログテーブルにアーカイブし、本テーブルからは（性能上）物理削除すべきだろう
+  responses:
+    '204':
+      description: Deleted
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Todo.yaml
+    '400':
+      $ref: ../components/responses/Problem-400_BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Problem-401_Unauthorized.yaml
+    '404':
+      $ref: ../components/responses/Problem-404_NotFound.yaml
+    '422':
+      $ref: ../components/responses/Problem-422_UnprocessableEntity.yaml
+
+# -----
+# GET /todos/{todoId}
+# -----
+get:
+  tags:
+    - Todo
+  summary: todoIdによるTODO取得
+  operationId: todoGet
+  description: |
+    - ログイン済み前提
+  responses:
+    '200':
+      description: Retrieved
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Todo.yaml
+    '400':
+      $ref: ../components/responses/Problem-400_BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Problem-401_Unauthorized.yaml
+    '404':
+      $ref: ../components/responses/Problem-404_NotFound.yaml

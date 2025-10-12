@@ -1,0 +1,100 @@
+#
+# APIスキーマ定義
+#
+
+# - https://spec.openapis.org/oas/v3.0.3
+# - https://redocly.com/docs/cli/quickstart/
+# - https://qiita.com/KNR109/items/d3b6aa8803c62238d990
+
+# writing rules;
+#  - エンティティ定義はデータベースを正とする
+#    - name はデータベーススキーマ定義に揃える
+#    - 特記事項以外の description をAPIスキーマ定義に記載しない
+#     （二重定義を避けるため、特筆ない場合は明確に省略する
+
+# URL設計は著名サイトを参考
+#  - https://zenn.dev/yu1ro/articles/4c73274383b676#qiita
+
+# レスポンスコードに迷う時は以下参照
+#  - https://www.codetinkerer.com/2015/12/04/choosing-an-http-status-code.html
+
+openapi: 3.0.3
+
+info:
+  title: rest-backend-sample API定義書
+  version: 1.0.0
+  license:
+    name: UNLICENSED
+    url: 'https://unlicense.org/'
+  description:
+    $ref: ./info-description.md
+
+servers:
+  - url: https://api.example.com/api/v1
+    description: hosted for production
+  - url: https://{environment}.api.example.com/api/v1
+    description: hosted for internal
+    variables:
+      environment:
+        default: dev
+        enum:
+          - dev
+          - stg
+  - url: '{protocol}://{host}:{port}/api/v1'
+    description: hosted for development
+    variables:
+      protocol:
+        default: http
+        enum:
+          - http
+          - https
+      host:
+        default: localhost
+      port:
+        default: '3000'
+        enum:
+          - '3000'
+          - '80'
+          - '8080'
+          - '443'
+          - '8443'
+
+tags:
+  - name: Todo
+    description: Operations about todos.
+
+paths:
+  '/todos':
+    $ref: paths/todos.yaml
+  '/todos/{todoId}':
+    $ref: paths/todos_{todoId}.yaml
+
+components:
+  #
+  # ここにない components も、他所参照あればバンドラーが挿入します。
+  #
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: header # can be "header", "query" or "cookie"
+      name: X-API-KEY # name of the header, query parameter or cookie
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'https://example.com/api/oauth/dialog'
+          scopes:
+            'read:users': read users info
+            'write:users': modify or remove users
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+    basic_auth:
+      type: http
+      scheme: basic
+
+# Apply security globally to all operations
+security:
+  - api_key: [admin]
+#__EOF__

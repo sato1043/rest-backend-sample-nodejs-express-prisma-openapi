@@ -1,0 +1,12 @@
+#
+# Problem
+#
+description: Invalid Parameters supplied
+content:
+  application/problem+json:
+    schema:
+      $ref: ../schemas/_Problem.yaml
+    example:
+      title: Invalid Parameters supplied
+      status: 400
+      detail: paramThatOccurred,anotherOne

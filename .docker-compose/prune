@@ -1,0 +1,4 @@
+#!/bin/sh
+docker system df
+docker system prune
+docker system df

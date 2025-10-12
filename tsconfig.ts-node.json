@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts", "node_modules"],
+  "compilerOptions": {
+    "noEmit": true,
+    "noImplicitAny": false,
+    "paths": {
+      "prisma-factory/generated": ["../node_modules/prisma-factory/generated"]
+    }
+  }
+}

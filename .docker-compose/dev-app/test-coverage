@@ -1,0 +1,4 @@
+#!/bin/sh
+CMD="npx dotenv -v NODE_ENV=test -- jest --coverage $@"
+echo "${CMD}"
+docker compose exec dev-app sh -c "${CMD}"

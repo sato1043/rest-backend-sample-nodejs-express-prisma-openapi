@@ -1,0 +1,10 @@
+type: string
+enum:
+  - inc # means includes
+  - exc # means excludes
+  - eq # means equals
+  - ne # means not equals
+  - lt # means less than
+  - le # means less than or equals
+  - gt # means greater than
+  - ge # means greater than or equals

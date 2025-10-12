@@ -1,0 +1,31 @@
+#
+# TodoUpdate (from Todo)
+#
+type: object
+description: |
+  - 各属性は任意指定だが、指定した属性が全くない場合はエラーとする
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 100
+    allowEmptyValue: false
+    nullable: false
+    description: 属性には辞書による不正語の排除が必要
+  email:
+    type: string
+    format: email
+    minLength: 3
+    maxLength: 255
+    allowEmptyValue: false
+    nullable: false
+    description: 属性には辞書による不正語の排除が必要
+  text:
+    type: string
+    minLength: 0
+    maxLength: 1024
+    allowEmptyValue: false
+    nullable: false
+    description: 属性には辞書による不正語の排除が必要
+#required:
+# none of properties are required

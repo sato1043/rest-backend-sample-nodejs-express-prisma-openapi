@@ -1,0 +1,11 @@
+#
+# TodoFieldEnum (from Todo)
+#
+type: string
+enum:
+  - createdAt
+  - updatedAt
+  - todoId
+  - name
+  - email
+  - text

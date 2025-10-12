@@ -1,0 +1,572 @@
+openapi: 3.0.3
+info:
+  title: rest-backend-sample API定義書
+  version: 1.0.0
+  license:
+    name: UNLICENSED
+    url: https://unlicense.org/
+  description: |
+    This is an **example** API to demonstrate features of the OpenAPI specification.
+
+    # Introduction
+
+    This API definition is intended to to be a good starting point for
+    describing your API in
+
+    [OpenAPI/Swagger
+    format](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md).
+
+    It also demonstrates features of the
+    [create-openapi-repo](https://github.com/Redocly/create-openapi-repo) tool
+    and
+
+    the [Redoc](https://github.com/Redocly/Redoc) documentation engine. Beyond
+    the standard OpenAPI syntax, we use a few
+
+    [vendor
+    extensions](https://github.com/Redocly/Redoc/blob/master/docs/redoc-vendor-extensions.md).
+
+    # OpenAPI Specification
+
+    The goal of The OpenAPI Specification is to define a standard,
+    language-agnostic interface to REST APIs which
+
+    allows both humans and computers to discover and understand the capabilities
+    of the service without access to source
+
+    code, documentation, or through network traffic inspection. When properly
+    defined via OpenAPI, a consumer can
+
+    understand and interact with the remote service with a minimal amount of
+    implementation logic. Similar to what
+
+    interfaces have done for lower-level programming, OpenAPI removes the
+    guesswork in calling the service.
+servers:
+  - url: https://api.example.com/api/v1
+    description: hosted for production
+  - url: https://{environment}.api.example.com/api/v1
+    description: hosted for internal
+    variables:
+      environment:
+        default: dev
+        enum:
+          - dev
+          - stg
+  - url: '{protocol}://{host}:{port}/api/v1'
+    description: hosted for development
+    variables:
+      protocol:
+        default: http
+        enum:
+          - http
+          - https
+      host:
+        default: localhost
+      port:
+        default: '3000'
+        enum:
+          - '3000'
+          - '80'
+          - '8080'
+          - '443'
+          - '8443'
+tags:
+  - name: Todo
+    description: Operations about todos.
+paths:
+  /todos:
+    get:
+      tags:
+        - Todo
+      summary: TODO一覧
+      operationId: todoList
+      description: |
+        - ログイン済み前提
+        - ここで示すのはシーク法によるページネーションの定義例。シーク法はページジャンプをIDで計算するのでインフィニットスクロールでページネーションがずれない
+        - ページナビゲートのパラメータ４種（page|pagePrev|pageNext|infinite）は、排他的なオプションで、同時指定時にエラーとする（openAPIは排他オプションを定義できないため実装時は注意）
+          - ページ番号指定では（クエリー時点の表示内容に関わらず）クエリー時点のデータベースでそのページ番号の内容となる選択行を返す(のみ)
+          - 前ページ送りでは現在ページの最終行を基準に（データベースでの行数の増減に関わらず）前ページのperPage件以下を返却
+            1. ページ先頭行IDによりページ境界を計算（なお検索範囲は現在ページから前後10ページ程度でUIに表示が必要な範囲で）
+            2. 現在ページ先頭行IDより前のページ境界のうちの最大値を選択
+            3. 3.より後のperPage件を返却
+          - 次ページ送りでは現在ページの最終行を基準に（データベースでの行数の増減に関わらず）次ページのperPage件以下を返却
+            1. ページ後尾行IDによりページ境界を計算（なお検索範囲は現在ページから前後10ページ程度でUIに表示が必要な範囲で）
+            2. 現在ページ後尾行ID 以前のページ境界のうち最大を選択
+            3. 2.より後のperPage件を返却
+          - 無限スクロールでは現在ページの後尾行IDより後のperPage件以下を返却
+      parameters:
+        - description: 選択対象の限定条件（JSON値、複数可） https://swagger.io/docs/specification/serialization/
+          in: query
+          name: filter
+          required: false
+          example: '[{f:"email",s:"inc",c:"demo@"}]'
+          style: form
+          explode: true
+          allowEmptyValue: false
+          nullable: false
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    f:
+                      $ref: '#/components/schemas/TodoFieldEnum'
+                    s:
+                      $ref: '#/components/schemas/FilterCompareSignEnum'
+                    c:
+                      type: string
+        - description: 選択対象の整列キー（JSON値、複数可）
+          in: query
+          name: order
+          required: false
+          allowEmptyValue: false
+          nullable: false
+          example: '[{f:"todoId",d:"asc"}]'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    f:
+                      $ref: '#/components/schemas/TodoFieldEnum'
+                    d:
+                      $ref: '#/components/schemas/OrderDirection'
+        - description: ページ当たり選択行数
+          in: query
+          name: perPage
+          required: false
+          allowEmptyValue: false
+          nullable: false
+          schema:
+            $ref: '#/components/schemas/PerPage'
+        - description: ナビゲート・ページ番号指定
+          in: query
+          name: page
+          required: false
+          allowEmptyValue: false
+          nullable: false
+          schema:
+            $ref: '#/components/schemas/_Int64min1'
+          example: 3
+        - description: ナビゲート・前ページ送り（現在ページの先頭行ID指定）
+          in: query
+          name: pagePrev
+          required: false
+          allowEmptyValue: false
+          nullable: false
+          schema:
+            $ref: '#/components/schemas/_ID'
+          example: 55
+        - description: ナビゲート・次ページ送り（現在ページの末尾行ID指定）
+          in: query
+          name: pageNext
+          required: false
+          allowEmptyValue: false
+          nullable: false
+          schema:
+            $ref: '#/components/schemas/_ID'
+          example: 55
+        - description: ナビゲート・次perPage件取得（現在ページの末尾行ID指定）
+          in: query
+          name: infinite
+          required: false
+          allowEmptyValue: false
+          nullable: false
+          schema:
+            $ref: '#/components/schemas/_ID'
+          example: 55
+      responses:
+        '200':
+          description: Listed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  perPage:
+                    $ref: '#/components/schemas/PerPage'
+                  pageTotal:
+                    $ref: '#/components/schemas/_Int64min0'
+                  currentPageNo:
+                    $ref: '#/components/schemas/_Int64min0'
+                  list:
+                    description: 選択行リスト（０件の場合は空配列）
+                    type: array
+                    minimum: 0
+                    maxItems: 50
+                    items:
+                      $ref: '#/components/schemas/Todo'
+                    example:
+                      - - todoId: 4201
+                        - todoId: 4203
+                        - todoId: 4204
+                        - todoId: 4207
+                        - ...
+                        - todoId: 4255
+                required:
+                  - perPage
+                  - pageTotal
+                  - currentPageNo
+                  - list
+        '400':
+          $ref: '#/components/responses/Problem-400_BadRequest'
+        '401':
+          $ref: '#/components/responses/Problem-401_Unauthorized'
+    post:
+      tags:
+        - Todo
+      summary: TODO作成
+      operationId: todoCreate
+      description: |
+        - ログイン済み前提
+        - 別途UI用のキー項目重複確認APIが必要（email, name 各１）
+        - 既存レコードと主キー制約で競合する場合はエラーとする(409)
+      requestBody:
+        description: 作成するTODO属性
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoCreate'
+            example:
+              name: Information Of The Demonstration
+              email: demo@example.info
+              text: 牛乳を買って帰る（低脂肪のみ可）
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/Problem-400_BadRequest'
+        '401':
+          $ref: '#/components/responses/Problem-401_Unauthorized'
+        '409':
+          $ref: '#/components/responses/Problem-409_Conflict'
+  /todos/{todoId}:
+    parameters:
+      - description: 取得する TODO ID
+        name: todoId
+        in: path
+        required: true
+        allowEmptyValue: false
+        nullable: false
+        schema:
+          $ref: '#/components/schemas/_ID'
+        example: 42
+        x-example: 42
+    put:
+      tags:
+        - Todo
+      summary: todoIdによる属性変更
+      operationId: todoUpdate
+      description: |
+        - ログイン済み前提
+        - ビジネス条件の揃わない更新不可レコードの更新試行はエラーとする(422)
+      requestBody:
+        description: 変更するTODO属性
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoUpdate'
+            example:
+              name: Information Of The Demonstration
+              email: demo@example.info
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/Problem-400_BadRequest'
+        '401':
+          $ref: '#/components/responses/Problem-401_Unauthorized'
+        '404':
+          $ref: '#/components/responses/Problem-404_NotFound'
+        '422':
+          $ref: '#/components/responses/Problem-422_UnprocessableEntity'
+    delete:
+      tags:
+        - Todo
+      summary: todoIdによるTODO削除
+      operationId: todoDelete
+      description: |
+        - ログイン済み前提
+        - 削除前に精算の事務処理終了確認あるいはシステム連携が入るだろう
+        - ビジネス条件の揃わない削除不可レコードの削除試行はエラーとする(422)
+        - 削除済みレコードは（保全上）ログテーブルにアーカイブし、本テーブルからは（性能上）物理削除すべきだろう
+      responses:
+        '204':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/Problem-400_BadRequest'
+        '401':
+          $ref: '#/components/responses/Problem-401_Unauthorized'
+        '404':
+          $ref: '#/components/responses/Problem-404_NotFound'
+        '422':
+          $ref: '#/components/responses/Problem-422_UnprocessableEntity'
+    get:
+      tags:
+        - Todo
+      summary: todoIdによるTODO取得
+      operationId: todoGet
+      description: |
+        - ログイン済み前提
+      responses:
+        '200':
+          description: Retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/Problem-400_BadRequest'
+        '401':
+          $ref: '#/components/responses/Problem-401_Unauthorized'
+        '404':
+          $ref: '#/components/responses/Problem-404_NotFound'
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+    oauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://example.com/api/oauth/dialog
+          scopes:
+            read:users: read users info
+            write:users: modify or remove users
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+    basic_auth:
+      type: http
+      scheme: basic
+  schemas:
+    TodoFieldEnum:
+      type: string
+      enum:
+        - createdAt
+        - updatedAt
+        - todoId
+        - name
+        - email
+        - text
+    FilterCompareSignEnum:
+      type: string
+      enum:
+        - inc
+        - exc
+        - eq
+        - ne
+        - lt
+        - le
+        - gt
+        - ge
+    OrderDirection:
+      type: string
+      enum:
+        - asc
+        - dsc
+    PerPage:
+      description: ページ当たり選択行数
+      type: integer
+      default: 50
+    _Int64min1:
+      description: |
+        Integer(64) >= 1
+      type: integer
+      format: int64
+      minimum: 1
+      example: 42
+      x-example: 42
+    _ID:
+      description: |
+        @id type (int64 >= 1)
+      type: integer
+      format: int64
+      minimum: 1
+      example: 42
+      x-example: 42
+    _Int64min0:
+      description: |
+        Integer(64) >= 0
+      type: integer
+      format: int64
+      minimum: 0
+      example: 42
+      x-example: 42
+    Todo:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        todoId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        text:
+          type: string
+      required:
+        - createdAt
+        - updatedAt
+        - todoId
+        - name
+        - email
+        - text
+    _Problem:
+      type: object
+      additionalProperties: true
+      minProperties: 1
+      description: The Problem Details JSON Object [[RFC7807](https://tools.ietf.org/html/rfc7807)].
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference [[RFC3986](https://tools.ietf.org/html/rfc3986)] that identifies the problem type. It should provide human-readable documentation for the problem type. When this member is not present, its value is assumed to be "about:blank".
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization.
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+          description: The HTTP status code.
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem.
+        instance:
+          type: string
+          description: A URI reference that identifies the specific occurrence of the problem.  It may or may not yield further information if dereferenced.
+    TodoCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          allowEmptyValue: false
+          nullable: false
+          description: 属性には辞書による不正語の排除が必要
+        email:
+          type: string
+          format: email
+          minLength: 3
+          maxLength: 255
+          allowEmptyValue: false
+          nullable: false
+          description: 属性には辞書による不正語の排除が必要
+        text:
+          type: string
+          minLength: 0
+          maxLength: 1024
+          allowEmptyValue: false
+          nullable: false
+          description: 属性には辞書による不正語の排除が必要
+      required:
+        - name
+        - email
+        - text
+    TodoUpdate:
+      type: object
+      description: |
+        - 各属性は任意指定だが、指定した属性が全くない場合はエラーとする
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          allowEmptyValue: false
+          nullable: false
+          description: 属性には辞書による不正語の排除が必要
+        email:
+          type: string
+          format: email
+          minLength: 3
+          maxLength: 255
+          allowEmptyValue: false
+          nullable: false
+          description: 属性には辞書による不正語の排除が必要
+        text:
+          type: string
+          minLength: 0
+          maxLength: 1024
+          allowEmptyValue: false
+          nullable: false
+          description: 属性には辞書による不正語の排除が必要
+  responses:
+    Problem-400_BadRequest:
+      description: Invalid Parameters supplied
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/_Problem'
+          example:
+            title: Invalid Parameters supplied
+            status: 400
+            detail: paramThatOccurred,anotherOne
+    Problem-401_Unauthorized:
+      description: Request Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/_Problem'
+          example:
+            title: Request Unauthorized
+            status: 401
+    Problem-409_Conflict:
+      description: Resource Conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/_Problem'
+          example:
+            title: Resource Conflict
+            status: 409
+            detail: paramThatOccurred,anotherOne
+    Problem-404_NotFound:
+      description: Resource Not Found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/_Problem'
+          example:
+            title: Resource Not Found
+            status: 404
+    Problem-422_UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/_Problem'
+          example:
+            title: Unprocessable Entity
+            status: 422
+security:
+  - api_key:
+      - admin
