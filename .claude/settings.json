@@ -1,0 +1,77 @@
+{
+  "language": "ja",
+  "defaultModel": "claude-3-7-sonnet",
+  "maxOutputTokens": 4096,
+  "tone": "concise",
+  "systemPrompt": "あなたはこのリポジトリ専属のフルスタックエンジニア兼レビュアです。安全・簡潔・再現性を重視し、根拠と手順を明示して提案・変更を行ってください。機密情報（API キー、秘密鍵、個人情報など）は生成・貼付・保存しないでください。誤りの可能性があるときは率直に不確実性を伝え、確認方法を示してください。",
+  "ignore": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/.turbo/**",
+    "**/.cache/**"
+  ],
+  "permissions": {
+    "allow": [
+      "Read(./**)",
+      "Edit(./**)",
+
+      "Bash(npm run postinstall)",
+      "Bash(npm run ecr:login)",
+      "Bash(npm run ecr:logout)",
+      "Bash(npm run docker:lint)",
+      "Bash(npm run docker:build)",
+      "Bash(npm run docker:run)",
+      "Bash(npm run docker:push)",
+      "Bash(npm run openapi:bundle)",
+      "Bash(npm run openapi:genkey)",
+      "Bash(npm run openapi:uiview)",
+      "Bash(npm run lint)",
+      "Bash(npm run debug)",
+
+      "Bash(git:*)"
+    ],
+    "deny": [
+      "Edit(./.git/**)",
+      "Edit(./node_modules/**)",
+      "Edit(./dist/**)",
+
+      "Bash(npm run prerequisites)",
+      "Bash(npm run postrequisites)",
+      "Bash(npm publish:*)",
+      "Bash(npm run start)",
+
+      "WebFetch(domain:*)"
+    ]
+  },
+  "review": {
+    "enableChecklists": true,
+    "checklists": [
+      {
+        "name": "Node/Express API 変更レビュー",
+        "items": [
+          "型定義(TypeScript)は入出力(リクエスト/レスポンス)と実装で整合しているか",
+          "OpenAPI スキーマと実装・テストの不整合はないか",
+          "エラーハンドリング: 4xx/5xx を適切に返し、問題詳細(JSON Problem)はスキーマ準拠か",
+          "入力検証とサニタイズは十分か",
+          "Prisma クエリのトランザクション/例外処理/パフォーマンスに問題がないか",
+          "テスト(ユニット/統合/E2E)は追加・更新され、決定的に通るか",
+          "ドキュメント(README/コメント/OpenAPI)は更新されているか"
+        ]
+      }
+    ]
+  },
+  "commits": {
+    "conventional": true,
+    "types": ["feat", "fix", "docs", "refactor", "test", "chore", "perf", "build", "ci", "revert"],
+    "scopes": ["api", "rdb", "infra", "docs", "tests", "ci"],
+    "subjectRule": "短く具体的に。命令形: 動詞から始める (例: fix, add, update)。日本語可"
+  },
+  "includeCoAuthoredBy": false,
+  "prompts": {
+    "howToChangeCode": "次の変更を最小差分で実装してください。前提/根拠/手順/影響範囲/テストを列挙し、必要なファイルのみを編集してください。",
+    "writeTests": "回帰を防ぐテストを先に作成し、失敗を確認してから修正を行い、最後にテストが通ることを確認してください。",
+    "updateOpenAPI": "エンドポイント/モデルの変更時は OpenAPI を更新し、生成物の更新可否を指示してください。"
+  }
+}

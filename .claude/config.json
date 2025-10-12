@@ -1,0 +1,9 @@
+{
+  "projectName": "rest-be-sample-nodejs-express-prisma-openapi",
+  "context": [
+    "README.md",
+    "openapi/openapi-root.yaml",
+    "openapi/openapi.static.html",
+    "prisma/schema.prisma"
+  ]
+}
