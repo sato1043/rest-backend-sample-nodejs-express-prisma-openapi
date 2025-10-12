@@ -1,0 +1,41 @@
+# In general, use LF for text
+* text eol=lf
+
+# Windows CMD does not like LF in batch files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Visual Studio solutions like to switch to CRLF at times
+*.sln text eol=crlf
+
+*.ai binary
+*.aiff binary
+*.dll binary
+*.eot binary
+*.exe binary
+*.gif binary
+*.jar binary
+*.jpg binary
+*.ico binary
+*.mp3 binary
+*.o binary
+*.pdf binary
+*.png binary
+*.psd binary
+*.so binary
+*.ttf binary
+*.winmd binary
+*.zip binary
+
+*.xls binary
+*.xlsx binary
+*.doc binary
+*.docx binary
+*.ppt binary
+*.pptx binary
+
+*.pbxproj -text
+
+# Prevent EOL normalization on Yarn v1 local binary script so it can be committed as-is
+.yarn/releases/yarn-*.cjs -text
+

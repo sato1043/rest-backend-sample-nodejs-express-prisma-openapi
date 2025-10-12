@@ -1,0 +1,41 @@
+[gui]
+	encoding = utf-8
+[color]
+	ui = true
+	diff = auto
+	status = auto
+	branch = auto
+[core]
+	autoCRLF = false
+	safecrlf = true
+	quotepath = false
+	editor = vim -c \"set fenc=utf-8\"
+	precomposeunicode = true
+	fscache = true
+	ignorecase = false
+[alias]
+	tree = log --graph --branches --pretty=format:\"%d [%h] %s\"
+	st = status
+	co = checkout
+	ci = commit
+	ls-commited = diff-tree --no-commit-id --name-only -r
+	current-branch-name = ! git branch | grep -e '^\\* ' | sed -e 's/^\\* //g'
+	force-pull = !git fetch && git reset --hard origin/$(git current-branch-name)
+[url "https://"]
+	insteadOf = git://
+[http]
+	sslVerify = false
+[init]
+	defaultBranch = develop
+[fetch]
+	prune = true
+[push]
+	default = simple
+[pull]
+	ff = only
+[diff]
+	submodule = log
+[filter "media"]
+	required = true
+	clean = git media clean %f
+	smudge = git media smudge %f
